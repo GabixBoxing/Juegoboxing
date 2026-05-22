@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🇨🇺 CUBAN BOXING - TORNEO DE CAMPEONES</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 30% 40%, #0f0f1f, #03030a);
+            font-family: 'Barlow Condensed', 'Impact', 'Arial Black', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+        @keyframes glow {
+            0% { text-shadow: 0 0 2px #D4A017; }
+            100% { text-shadow: 0 0 12px #ffcc44; }
+        }
+        @keyframes hitFlash {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.6) drop-shadow(0 0 5px red); }
+            100% { filter: brightness(1); }
+        }
+        .game-container {
+            max-width: 550px;
+            width: 100%;
+            background: rgba(10, 10, 25, 0.85);
+            backdrop-filter: blur(3px);
+            border-radius: 64px;
+            padding: 20px 16px;
+            border: 2px solid #D4A017;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,215,0,0.3);
+        }
+        .title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #f5d742, #b8860b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: glow 1.2s infinite alternate;
+            margin-bottom: 12px;
+        }
+        .sub {
+            text-align: center;
+            font-size: 13px;
+            color: #D4A017;
+            margin-top: -8px;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+        .fighters {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .fighter {
+            background: #0a0a18e6;
+            border-radius: 36px;
+            padding: 14px 8px;
+            text-align: center;
+            flex: 1;
+            border: 1px solid #D4A017;
+            box-shadow: 0 8px 12px rgba(0,0,0,0.4);
+            transition: 0.1s;
+        }
+        .fighter-name {
+            font-size: 22px;
+            font-weight: 900;
+            color: #FFD966;
+        }
+        .health-bg {
+            background: #3a1a1a;
+            border-radius: 20px;
+            height: 18px;
+            margin: 8px 6px;
+            overflow: hidden;
+        }
+        .health-fill {
+            width: 100%;
+            height: 100%;
+            background: #27ae60;
+            border-radius: 20px;
+            transition: width 0.2s cubic-bezier(0.2, 1.2, 0.8, 1);
+        }
+        .hp-text {
+            font-size: 13px;
+            font-weight: bold;
+            color: #ddd;
+        }
+        .vs {
+            font-size: 28px;
+            font-weight: 900;
+            color: #D4A017;
+            align-self: center;
+            background: #00000066;
+            border-radius: 60px;
+            padding: 6px 12px;
+        }
+        .combo-area {
+            background: #00000099;
+            border-radius: 40px;
+            padding: 6px;
+            margin: 12px 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #f39c12;
+        }
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .punch-btn {
+            background: #2c2c3a;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 0;
+            font-weight: 900;
+            font-size: 20px;
+            color: white;
+            cursor: pointer;
+            transition: 0.05s linear;
+            box-shadow: 0 6px 0 #0a0a12;
+            border-bottom: 2px solid #D4A017;
+            letter-spacing: 2px;
+        }
+        .punch-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #0a0a12;
+        }
+        .btn-jab { background: linear-gradient(145deg, #1e4a6e, #0f2f4a); }
+        .btn-hook { background: linear-gradient(145deg, #8b4a1a, #5e2e0e); }
+        .btn-upper { background: linear-gradient(145deg, #9b2a3a, #6b1a2a); }
+        .next-btn {
+            background: #D4A017;
+            color: #0a0a12;
+            width: 100%;
+            margin-top: 12px;
+            box-shadow: 0 6px 0 #8a6e0e;
+            font-size: 20px;
+        }
+        .message {
+            background: #000000aa;
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 12px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 16px;
+            border-left: 4px solid #D4A017;
+        }
+        .belt-screen {
+            text-align: center;
+            background: linear-gradient(145deg, #1a1a2a, #0a0a14);
+            border-radius: 48px;
+            padding: 24px;
+            border: 3px solid #D4A017;
+            animation: glow 1s infinite alternate;
+        }
+        canvas {
+            display: block;
+            margin: 15px auto;
+            background: #0a0a1a;
+            border-radius: 32px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 0 0 3px #D4A017, 0 10px 20px black;
+        }
+        .winner-name {
+            font-size: 28px;
+            font-weight: 900;
+            color: #f1c40f;
+            text-shadow: 3px 3px 0 #b8860b;
+            margin: 12px 0;
+        }
+        .damage-number {
+            position: absolute;
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffaa33;
+            text-shadow: 1px 1px 0 black;
+            pointer-events: none;
+            animation: floatUp 0.7s ease-out forwards;
+            z-index: 200;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0px) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+        }
+        .hit-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle, #ffaa3311, transparent);
+            animation: flash 0.15s 2;
+            z-index: 50;
+        }
+        @keyframes flash {
+            0% { opacity: 0; }
+            50% { opacity: 0.5; background: radial-gradient(circle, #ffcc44, transparent); }
+            100% { opacity: 0; }
+        }
+        button:disabled {
+            opacity: 0.6;
+            transform: none;
+        }
+        @media (max-width: 480px) {
+            .fighter-name { font-size: 18px; }
+            .punch-btn { font-size: 16px; padding: 12px; }
+            .vs { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div id="gameRoot"></div>
+<script>
+    (function(){
+        // RIVALES ÉPICOS
+        const rivals = [
+            { name: "🔥 RIVAL 1: FOGUEO",   hp: 80,  dmg: 7,  crit: 0.1, img: "🥊" },
+            { name: "⚡ RIVAL 2: RELÁMPAGO", hp: 90,  dmg: 9,  crit: 0.15, img: "⚡" },
+            { name: "💪 RIVAL 3: ACERO",    hp: 100, dmg: 11, crit: 0.2,  img: "💢" },
+            { name: "🌪️ RIVAL 4: FURIA",    hp: 112, dmg: 13, crit: 0.25, img: "🌪️" },
+            { name: "👑 RIVAL 5: TITÁN",    hp: 130, dmg: 16, crit: 0.3,  img: "👑" }
+        ];
+        let fightIndex = 0;
+        let player = { name: "", hp: 100, maxHp: 100, combo: 0 };
+        let enemy = null;
+        let active = true;
+        let canAct = true;
+        let fightResult = null;
+        let tournamentWon = false;
+        let lastDamage = 0;
+        let root = document.getElementById("gameRoot");
+        
+        // Helper: mensaje
+        function setMessage(text, isError = false) {
+            let msgDiv = document.getElementById("msgBox");
+            if (msgDiv) {
+                msgDiv.innerText = text;
+                msgDiv.style.color = isError ? "#ff8888" : "#FFD966";
+                if (!tournamentWon && active) {
+                    setTimeout(() => {
+                        if (document.getElementById("msgBox") && !tournamentWon && active)
+                            document.getElementById("msgBox").innerText = "⚡ ¡ELIGE TU GOLPE!";
+                    }, 1600);
+                }
+            }
+        }
+        // Efecto de daño flotante
+        function floatingDamage(amount, isPlayer) {
+            let div = document.createElement("div");
+            div.className = "damage-number";
+            div.innerText = `-${amount}`;
+            div.style.color = "#ff5533";
+            div.style.left = isPlayer ? "25%" : "65%";
+            div.style.bottom = "40%";
+            div.style.position = "fixed";
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 700);
+            let flashDiv = document.createElement("div");
+            flashDiv.className = "hit-effect";
+            document.body.appendChild(flashDiv);
+            setTimeout(() => flashDiv.remove(), 200);
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+        // Actualizar UI
+        function updateUI() {
+            let pFill = document.getElementById("pFill");
+            let pHp = document.getElementById("pHp");
+            let eFill = document.getElementById("eFill");
+            let eHp = document.getElementById("eHp");
+            let comboEl = document.getElementById("comboVal");
+            if (pFill) pFill.style.width = Math.max(0, (player.hp / player.maxHp) * 100) + "%";
+            if (pHp) pHp.innerText = Math.floor(player.hp) + "%";
+            if (eFill && enemy) eFill.style.width = Math.max(0, (enemy.hp / enemy.maxHp) * 100) + "%";
+            if (eHp && enemy) eHp.innerText = Math.floor(enemy.hp) + "%";
+            if (comboEl) comboEl.innerText = player.combo;
+            // color de vida
+            if (pFill && player.hp / player.maxHp < 0.3) pFill.style.background = "#e74c3c";
+            else if (pFill) pFill.style.background = "#27ae60";
+            if (eFill && enemy && enemy.hp / enemy.maxHp < 0.3) eFill.style.background = "#e74c3c";
+            else if (eFill && enemy) eFill.style.background = "#27ae60";
+        }
+        
+        // Ataque del jugador
+        function playerAttack(type) {
+            if (!active || !canAct || tournamentWon) return;
+            if (player.hp <= 0 || enemy.hp <= 0) return;
+            let base = type === "jab" ? 9 : type === "hook" ? 14 : 19;
+            let dmg = base + Math.floor(Math.random() * 6) - 2;
+            dmg = Math.max(6, dmg);
+            let isCrit = Math.random() < 0.2;
+            if (isCrit) dmg = Math.floor(dmg * (type === "jab" ? 1.4 : type === "hook" ? 1.5 : 1.65));
+            // Bono por combo (cada golpe seguido suma +2 daño)
+            let comboBonus = player.combo * 2;
+            dmg += comboBonus;
+            dmg = Math.floor(dmg);
+            enemy.hp = Math.max(0, enemy.hp - dmg);
+            floatingDamage(dmg, false);
+            setMessage(`💢 ¡${type.toUpperCase()}! -${dmg} HP ${isCrit ? "💥 CRÍTICO" : ""} ${comboBonus > 0 ? `🔥 COMBO +${comboBonus}` : ""}`);
+            updateUI();
+            if (enemy.hp <= 0) {
+                active = false;
+                fightResult = "win";
+                setMessage(`✨ ¡VICTORIA! Derribaste a ${enemy.name}`);
+                document.getElementById("nextBtn").disabled = false;
+                document.getElementById("nextBtn").innerHTML = "➡️ SIGUIENTE PELEA";
+                player.combo = 0;
+                updateUI();
+                return;
+            }
+            // Incrementar combo
+            player.combo++;
+            updateUI();
+            canAct = false;
+            setTimeout(() => {
+                if (active && player.hp > 0 && enemy.hp > 0) enemyAttack();
+                canAct = true;
+            }, 550);
+        }
+        
+        function enemyAttack() {
+            if (!active || player.hp <= 0) return;
+            let dmg = enemy.dmg + Math.floor(Math.random() * 6) - 2;
+            dmg = Math.max(5, dmg);
+            let isCrit = Math.random() < enemy.crit;
+            if (isCrit) dmg = Math.floor(dmg * 1.5);
+            player.hp = Math.max(0, player.hp - dmg);
+            floatingDamage(dmg, true);
+            setMessage(`😤 ${enemy.name} contraataca: -${dmg} HP ${isCrit ? "⚡ CRÍTICO" : ""}`, true);
+            updateUI();
+            if (player.hp <= 0) {
+                active = false;
+                fightResult = "lose";
+                setMessage(`💀 ¡KNOCKOUT! Has perdido contra ${enemy.name}`, true);
+                document.getElementById("nextBtn").disabled = false;
+                document.getElementById("nextBtn").innerHTML = "🔁 REINICIAR TORNEO";
+                player.combo = 0;
+                updateUI();
+                return;
+            }
+            // El enemigo rompe combo
+            player.combo = 0;
+            updateUI();
+        }
+        
+        function nextFight() {
+            if (tournamentWon) { resetTournament(); return; }
+            if (fightResult === "lose") { resetTournament(); return; }
+            if (fightResult === "win") {
+                fightIndex++;
+                if (fightIndex >= rivals.length) {
+                    tournamentWon = true;
+                    renderBelt();
+                    return;
+                } else {
+                    loadFight(fightIndex);
+                }
+            }
+        }
+        
+        function loadFight(index) {
+            let r = rivals[index];
+            enemy = {
+                name: r.name,
+                hp: r.hp,
+                maxHp: r.hp,
+                dmg: r.dmg,
+                crit: r.crit,
+                img: r.img
+            };
+            player.hp = player.maxHp;
+            player.combo = 0;
+            active = true;
+            fightResult = null;
+            canAct = true;
+            renderFightScreen();
+            setMessage(`🥊 PELEA ${index+1} DE ${rivals.length} · VS ${enemy.name}`);
+        }
+        
+        function renderFightScreen() {
+            root.innerHTML = `
+                <div class="game-container">
+                    <div class="title">🇨🇺 CUBAN BOXING 🇨🇺</div>
+                    <div class="sub">★ TORNEO DE CAMPEONES ★</div>
+                    <div class="fighters">
+                        <div class="fighter">
+                            <div class="fighter-name">🥊 ${player.name}</div>
+                            <div class="health-bg"><div id="pFill" class="health-fill" style="width:100%"></div></div>
+                            <div id="pHp" class="hp-text">100%</div>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="fighter">
+                            <div class="fighter-name">${enemy.img} ${enemy.name}</div>
+                            <div class="health-bg"><div id="eFill" class="health-fill" style="width:100%"></div></div>
+                            <div id="eHp" class="hp-text">${enemy.hp}%</div>
+                        </div>
+                    </div>
+                    <div class="combo-area">🔥 COMBO: <span id="comboVal">0</span> 🔥</div>
+                    <div class="actions">
+                        <button class="punch-btn btn-jab" id="jabBtn">🤜 JAB</button>
+                        <button class="punch-btn btn-hook" id="hookBtn">👊 GANCHO</button>
+                        <button class="punch-btn btn-upper" id="upperBtn">💥 UPPERCUT</button>
+                    </div>
+                    <button class="punch-btn next-btn" id="nextBtn">➡️ SIGUIENTE PELEA</button>
+                    <div id="msgBox" class="message">⚡ ¡PRIMER GOLPE!</div>
+                </div>
+            `;
+            document.getElementById("jabBtn").onclick = () => playerAttack("jab");
+            document.getElementById("hookBtn").onclick = () => playerAttack("hook");
+            document.getElementById("upperBtn").onclick = () => playerAttack("upper");
+            document.getElementById("nextBtn").onclick = () => nextFight();
+            if (!active) document.getElementById("nextBtn").disabled = false;
+            else document.getElementById("nextBtn").disabled = true;
+            updateUI();
+        }
+        
+        function renderBelt() {
+            root.innerHTML = `
+                <div class="game-container">
+                    <div class="belt-screen">
+                        <div class="title">🏆 ¡CAMPEÓN ABSOLUTO! 🏆</div>
+                        <canvas id="champCanvas" width="400" height="300" style="width:100%; max-width:380px; margin:0 auto;"></canvas>
+                        <div class="winner-name">${player.name.toUpperCase()}</div>
+                        <div style="font-size:18px; margin:8px 0;">✨ NUEVO REY DEL RING ✨</div>
+                        <button class="punch-btn next-btn" id="restartBtn">🔄 JUGAR DE NUEVO</button>
+                    </div>
+                </div>
+            `;
+            drawChampionCanvas();
+            document.getElementById("restartBtn").onclick = () => resetTournament();
+        }
+        
+        function drawChampionCanvas() {
+            let can = document.getElementById("champCanvas");
+            if (!can) return;
+            let ctx = can.getContext("2d");
+            let w = can.width, h = can.height;
+            ctx.fillStyle = "#0a1c3a";
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = "#c0392b";
+            ctx.fillRect(0, 0, w, 28);
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 55, w, 28);
+            ctx.fillStyle = "#c0392b";
+            ctx.fillRect(0, 110, w, 28);
+            ctx.fillStyle = "#1a4a7a";
+            ctx.fillRect(0, 0, 85, 140);
+            ctx.fillStyle = "#FFD966";
+            ctx.font = "bold 22px 'Barlow Condensed'";
+            ctx.fillText("★ CUBA ★", 12, 90);
+            ctx.fillStyle = "#f7cf9f";
+            ctx.beginPath();
+            ctx.arc(w/2, 155, 36, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#D4A017";
+            ctx.beginPath();
+            ctx.ellipse(w/2, 125, 32, 18, 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(w/2-14, 145, 5, 0, Math.PI*2);
+            ctx.arc(w/2+14, 145, 5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#2c5282";
+            ctx.fillRect(w/2-28, 180, 56, 58);
+            ctx.fillStyle = "#c0392b";
+            ctx.beginPath();
+            ctx.ellipse(w/2-38, 195, 16, 24, -0.3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(w/2+38, 195, 16, 24, 0.3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#D4A017";
+            ctx.fillRect(w/2-34, 218, 68, 16);
+            ctx.fillStyle = "#b8860b";
+            ctx.fillRect(w/2-26, 220, 52, 12);
+            ctx.fillStyle = "#e74c3c";
+            ctx.font = "bold 16px 'Barlow Condensed'";
+            ctx.fillText("CUBAN CHAMP", w/2-62, 235);
+            ctx.fillStyle = "#FFD966";
+            ctx.font = "bold 22px 'Barlow Condensed'";
+            ctx.fillText(player.name.toUpperCase().slice(0,12), w/2-65, 275);
+            ctx.fillStyle = "#aaa";
+            ctx.font = "italic 12px sans-serif";
+            ctx.fillText("LEYENDA DEL BOXEO", w/2-70, 295);
+        }
+        
+        function resetTournament() {
+            fightIndex = 0;
+            player.hp = player.maxHp;
+            tournamentWon = false;
+            loadFight(0);
+        }
+        
+        // Inicio
+        let playerName = prompt("🇨🇺 ¡GLORIA O NADA! 🇨🇺\nNOMBRE DE TU BOXEADOR:", "EL CUBANO");
+        if (!playerName) playerName = "EL CUBANO";
+        player.name = playerName;
+        loadFight(0);
+    })();
+</script>
+</body>
+</html>
